@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import streamlit as st
-
+import geopandas as gpd
 
 st.set_page_config(page_title="Calculadora de Costo Total de Propiedad (TCO)", layout="wide")
 
@@ -38,6 +38,7 @@ with st.expander("Carga de archivos"):
     # stock_articulos = stock_articulos.groupby(["Artículo"])["STOCK"].sum().reset_index()
     # stock_articulos = stock_articulos.sort_values(by=['STOCK'], ascending=[False])
 
+    datos_movimientos['Artículo'] = datos_movimientos['Artículo'].astype(str)
     datos_movimientos = datos_movimientos[~datos_movimientos['Artículo'].str.startswith('EMB')]
     datos_movimientos['Artículo'] = datos_movimientos['Artículo'].astype('int64')
     datos_movimientos['Gramos'] = datos_movimientos['Gramos'].str.lstrip('=')
@@ -102,6 +103,7 @@ with st.expander("Carga de archivos"):
     datos['Cantidad'] = datos['Cantidad'].fillna(0).astype(int)
 
     # Combinar tabla con pesos de los articulos
+    datos_articulos['Codigo Largo'] = datos_articulos['Codigo Largo'].astype(str)
     datos_articulos = datos_articulos[~datos_articulos['Codigo Largo'].str.startswith('EMB')]
     datos_articulos = datos_articulos[datos_articulos['Codigo Largo'] != "VARIOS"]
     datos_articulos = datos_articulos[~datos_articulos['Codigo Largo'].isin(["Parlog","Pchep","Pplastico","Pavon2m","Pdescartable","testsistemas"])]
