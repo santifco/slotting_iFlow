@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 
-
 st.set_page_config(page_title="Calculadora de Costo Total de Propiedad (TCO)", layout="wide")
 
 with st.expander("Carga de archivos"):
@@ -163,7 +162,8 @@ with st.sidebar:
     # Crear un widget de selección de fecha
     fecha_inicio = st.date_input('Fecha inicial:', value=datos_movimientos['Inicio'].min())
     fecha_fin = st.date_input('Fecha final:', value=datos_movimientos['Inicio'].max())
-
+    height_map = st.slider("Height", 0, 2000, 600)
+    width_map = st.slider("Width", 0, 2000, 800)
 
 
 fragil = 1
@@ -1051,6 +1051,9 @@ with col1:
                 showlegend=False
             ))
 
+
+
+
         # Personalizar el gráfico
         fig_3.update_layout(
             title=f'Recorrido por Posiciones para Paleta {valor_paleta}',
@@ -1060,8 +1063,8 @@ with col1:
             legend=dict(x=1, y=1),
             xaxis=dict(tickmode='linear', dtick=1),
             yaxis=dict(tickmode='linear', dtick=1,autorange='reversed'),
-            width=800,
-            height=600
+            width=width_map,
+            height=height_map,
         )
 
         # Mostrar el gráfico con Streamlit
