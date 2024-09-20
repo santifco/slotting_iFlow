@@ -1070,6 +1070,8 @@ with col1:
         # Mostrar el gráfico con Streamlit
         st.plotly_chart(fig_3)
 
+        st.write(datos_paleta[["Inicio","Operario","Descripción","Posición O","Cantidad Blt"]])
+
 
 with col2:
 
