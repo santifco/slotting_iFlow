@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import streamlit as st
-import geopandas as gpd
+
 
 st.set_page_config(page_title="Calculadora de Costo Total de Propiedad (TCO)", layout="wide")
 
