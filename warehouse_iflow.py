@@ -364,7 +364,7 @@ with col1:
                 showscale=True,
                 line=dict(width=1, color='Black')
             ),
-            text=datos[mascara_articulos_cero][mostrar_columna].astype(str) + '<br>' + datos[mascara_articulos_cero]['ART.DESC.'] + '<br> Peso: ' + datos[mascara_articulos_cero]["Peso"].astype(str)+ '<br> Altura: ' + datos[mascara_articulos_cero]["Alto"].astype(str) ,
+            text=datos[mascara_articulos_cero]["Artículo"].astype(str) + "</br>" +datos[mascara_articulos_cero][mostrar_columna].astype(str) + '<br>' + datos[mascara_articulos_cero]['ART.DESC.'] + '<br> Peso: ' + datos[mascara_articulos_cero]["Peso"].astype(str)+ '<br> Altura: ' + datos[mascara_articulos_cero]["Alto"].astype(str) ,
             hoverinfo='text'
         ))
 
