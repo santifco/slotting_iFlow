@@ -1096,6 +1096,7 @@ with col2:
     suma_pallets = datos_movimientos['Paleta'].nunique()
     suma_horas = datos_movimientos['Duracion_horas'].sum()
     suma_tareas = datos_movimientos['Nro. Tarea'].nunique()
+    suma_lineas = datos_movimientos.shape[0]
     suma_articulos = datos["Artículo"].nunique()
     suma_posiciones = datos["POSICION"].nunique()
     suma_posiciones_vacias =  (datos["Artículo"] == 0).sum()
@@ -1123,13 +1124,14 @@ with col2:
     elif choice == "Productividad":
         col1, col2= st.columns(2)
         col1.metric("Bultos por Hora", f"{(suma_bultos/suma_horas):.0f}")
-        col2.metric("Kg por Hora", f"{(suma_pesos/suma_horas):.0f}")
+        col2.metric("Lineas por Hora", f"{(suma_lineas/suma_horas):.0f}")
         col1, col2= st.columns(2)
         col1.metric("Pallets por Hora", f"{(suma_pallets/suma_horas):.0f}")
         col2.metric("Pallets por Viaje", f"{(suma_pallets/suma_horas):.0f}")
         col1, col2= st.columns(2)
         col1, col2= st.columns(2)
         col1.metric("Minutos por Pallet", f"{minutos_pallet_mean:.1f}")
+        col2.metric("Kg por Hora", f"{(suma_pesos/suma_horas):.0f}")
         # col2.metric("Volumen por Parada ", f"{(suma_volumen/suma_paradas):.0f}")
         col1, col2= st.columns(2)
         # col1.metric("Bultos por Parada", f"{bultos_parada:.0f}")
