@@ -52,8 +52,8 @@ with st.expander("Carga de archivos"):
     datos_movimientos['Duracion_horas'] = datos_movimientos["Duracion"].dt.total_seconds()/3600
 
 
-    datos_movimientos = datos_movimientos.dropna(subset=['Posición O'])
-    datos_movimientos = datos_movimientos.dropna(subset=['Posición D'])
+    datos_movimientos = datos_movimientos.dropna(subset=['Posición O', 'Posición D'])
+    datos_movimientos = datos_movimientos[(datos_movimientos['Posición O'] != "7000") & (datos_movimientos['Posición D'] != "7000")]
     datos_movimientos['Sector_Pasillo'] = datos_movimientos['Posición O'].apply(lambda x: ''.join(c for c in x.split('-')[0].strip() if c.isalpha()))
     datos_movimientos['Columna'] = datos_movimientos['Posición O'].apply(lambda x: x.split('-')[1].strip())
     datos_movimientos['Sector_Pasillo_D'] = datos_movimientos['Posición D'].apply(lambda x: ''.join(c for c in x.split('-')[0].strip() if c.isalpha()))
@@ -103,6 +103,7 @@ with st.expander("Carga de archivos"):
 
     # Combinar tabla con pesos de los articulos
     datos_articulos['Codigo Largo'] = datos_articulos['Codigo Largo'].astype(str)
+    datos_articulos = datos_articulos[datos_articulos['Codigo Largo'].str.isdigit()]
     datos_articulos = datos_articulos[~datos_articulos['Codigo Largo'].str.startswith('EMB')]
     datos_articulos = datos_articulos[datos_articulos['Codigo Largo'] != "VARIOS"]
     datos_articulos = datos_articulos[~datos_articulos['Codigo Largo'].isin(["Parlog","Pchep","Pplastico","Pavon2m","Pdescartable","testsistemas"])]
@@ -1143,4 +1144,6 @@ with col2:
         col2.metric("Peso por Bulto", f"{((suma_pesos*1000)/suma_bultos):.1f}")
         col1, col2= st.columns(2)
         col1.metric("Bultos por Pallet", f"{(suma_bultos/suma_pallets):.0f}")
-        col2.metric("Volumen por Pallet", f"{(suma_volumen/suma_pallets):.0f}")
+        col2.metric("Bultos por Linea", f"{(suma_bultos/suma_lineas):.0f}")
+        col1, col2= st.columns(2)
+        col1.metric("Volumen por Pallet", f"{(suma_volumen/suma_pallets):.0f}")
