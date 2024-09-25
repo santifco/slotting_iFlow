@@ -71,6 +71,7 @@ with st.expander("Carga de archivos"):
     datos = datos.dropna(subset=['POSICION'])
     datos = datos[~datos['POSICION'].str.contains('FIC|FF')]
     datos = datos[~datos['POSICION'].str.startswith('01MG')]
+    datos = datos[datos['POSICION'] != '05VLV - 15 - 1A']
     datos = datos.rename(columns={'ARTICULO': 'Artículo'})
     datos['Artículo'] = datos['Artículo'].where(datos['FP']!= 0, 0)
     datos['FRAGIL'] = datos['Artículo'].where(datos['FP']!= 0, 1)
@@ -336,7 +337,7 @@ col1,spacer,col2 = st.columns([2,0.1, 1])  # Col1 será más ancha que Col2
 with col1:
     
 
-    mapa_seleccionado = st.selectbox('', ["Mapa Actual","Recorridos Picking","Slotting"],index=1)
+    mapa_seleccionado = st.selectbox('', ["Mapa Actual","Recorridos Picking","Slotting","Productividades"],index=1)
 
     if mapa_seleccionado =="Mapa Actual":
 
@@ -923,6 +924,7 @@ with col1:
         tiempo_total_paleta = round(datos_paleta['Duracion_horas'].sum()*60,2)
         palet_pi = datos_paleta[datos_paleta["Tipo"]=="PI"]
         productividad_palet = round(palet_pi["Cantidad"].sum()/palet_pi["Duracion_horas"].sum(),1)
+        productividad_lineas = round(palet_pi.shape[0]/palet_pi["Duracion_horas"].sum(),1)
 
         datos_paleta['Inicio'] = pd.to_datetime(datos_paleta['Inicio'])
         datos_paleta.sort_values(by='Inicio', ascending=True, inplace=True)
@@ -984,6 +986,7 @@ with col1:
                      f'Fecha: {fecha_paleta.min().strftime("%Y-%m-%d %H:%M:%S")} - {fecha_paleta.max().strftime("%Y-%m-%d %H:%M:%S")} <br>'
                      f'Operario: {operarios_paleta} <br>'
                      f'Productividad: {productividad_palet} blt/hr <br>'
+                     f'Productividad líneas: {productividad_lineas} lineas/hr <br>'
                     f'Tipo: {tipo} <br>')
 
         # Graficar todos los puntos de las posiciones
@@ -1072,6 +1075,52 @@ with col1:
         st.plotly_chart(fig_3)
 
         st.write(datos_paleta[["Inicio","Operario","Descripción","Posición O","Cantidad Blt"]])
+
+    if mapa_seleccionado == "Productividades":
+
+        datos_productividades = datos_movimientos[datos_movimientos["Tipo"]=="PI"]
+        datos_productividades = datos_productividades.groupby("Operario").agg({"Cantidad Blt":"sum","Duracion_horas":"sum","Kg":"sum","Artículo": "count"}).reset_index()
+        # st.write(datos_productividades["Duracion_horas"].sum())
+        datos_productividades["Blt/hr"] = datos_productividades["Cantidad Blt"]/datos_productividades["Duracion_horas"]
+        datos_productividades["Lin/hr"] = datos_productividades["Artículo"]/datos_productividades["Duracion_horas"]
+        datos_productividades["Kg/hr"] = datos_productividades["Kg"]/datos_productividades["Duracion_horas"]
+        # st.write(datos_productividades)
+        columnas_para_graficar = datos_productividades.columns.tolist()
+
+        # Remover la columna 'Operario' ya que no es cuantitativa para graficar
+        columnas_para_graficar.remove('Operario')
+        
+
+        # Crear una selección en Streamlit para elegir la columna
+        columna_seleccionada = st.selectbox("Selecciona la columna a graficar:", columnas_para_graficar)
+        media_columna = datos_productividades[columna_seleccionada].median()
+        # Crear el gráfico de barras utilizando Plotly
+        fig = px.bar(datos_productividades, x="Operario", y=columna_seleccionada, 
+                    title=f'Gráfico de barras para {columna_seleccionada}',
+                    labels={"Operario": "Operario", columna_seleccionada: columna_seleccionada})
+
+        fig.add_shape(
+        type="line",
+        x0=0, x1=1, y0=media_columna, y1=media_columna,
+        xref='paper', yref='y',
+        line=dict(color="Red", width=2, dash="dash"),
+        )
+
+        fig.add_annotation(
+        xref="paper", yref="y",
+        x=1, y=media_columna,
+        text=f"{media_columna:.2f}",
+        showarrow=False,
+        font=dict(color="Red", size=12),
+        align="right",
+        xanchor="left",  # Alinear a la izquierda de la línea
+        yanchor="bottom",  # Alinear debajo de la línea
+    )
+
+
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(fig)
+
 
 
 with col2:
