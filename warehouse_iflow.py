@@ -44,6 +44,8 @@ with st.expander("Carga de archivos"):
     # datos_movimientos['Artículo'] = datos_movimientos['Artículo'].apply(lambda x: int(float(str(x).replace(',', '.'))))
     datos_movimientos['Artículo'] = datos_movimientos['Artículo'].astype('int64')
     datos_movimientos['Gramos'] = datos_movimientos['Gramos'].str.lstrip('=')
+    # Filtrar filas donde no hay un asterisco en una columna específica
+    datos_movimientos = datos_movimientos[~datos_movimientos['Gramos'].str.contains(r'\*', na=False)]
     datos_movimientos['Gramos'] = datos_movimientos['Gramos'].apply(lambda x: float(eval(x)))
     datos_movimientos['Cantidad Blt'] = datos_movimientos['Cantidad Blt'].str.lstrip('=')
     datos_movimientos['Cantidad Blt'] = datos_movimientos['Cantidad Blt'].apply(lambda x: float(eval(x)))
@@ -78,6 +80,9 @@ with st.expander("Carga de archivos"):
     datos = datos.rename(columns={'ARTICULO': 'Artículo'})
     datos['Artículo'] = datos['Artículo'].where(datos['FP']!= 0, 0)
     datos['FRAGIL'] = datos['Artículo'].where(datos['FP']!= 0, 1)
+    datos['Artículo'] = datos['Artículo'].str.replace('D', '', regex=False)
+    datos['Artículo'] = datos['Artículo'].str.replace('A', '', regex=False)
+    datos = datos.dropna(subset=['Artículo'])
     datos['Artículo'] = datos['Artículo'].astype('int64')
 
     datos_movimientos_rp = datos_movimientos[datos_movimientos['Tipo'] == "RP"]
