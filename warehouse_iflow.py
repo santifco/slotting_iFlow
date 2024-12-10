@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import streamlit as st
+import re
 
 st.set_page_config(page_title="Calculadora de Costo Total de Propiedad (TCO)", layout="wide")
 
@@ -39,6 +40,8 @@ with st.expander("Carga de archivos"):
 
     datos_movimientos['Artículo'] = datos_movimientos['Artículo'].astype(str)
     datos_movimientos = datos_movimientos[~datos_movimientos['Artículo'].str.startswith('EMB')]
+    datos_movimientos['Artículo'] = datos_movimientos['Artículo'].apply(lambda x: re.sub(r'[a-zA-Z]', '', str(x)))
+    # datos_movimientos['Artículo'] = datos_movimientos['Artículo'].apply(lambda x: int(float(str(x).replace(',', '.'))))
     datos_movimientos['Artículo'] = datos_movimientos['Artículo'].astype('int64')
     datos_movimientos['Gramos'] = datos_movimientos['Gramos'].str.lstrip('=')
     datos_movimientos['Gramos'] = datos_movimientos['Gramos'].apply(lambda x: float(eval(x)))
@@ -274,16 +277,16 @@ with st.expander("Análisis de Inventario"):
     alturas = datos.groupby("Alto")["Artículo"].count().reset_index()
 
 
-    datos['cat_altura'], limites = pd.qcut(datos['Alto'], 4, labels=['Short', 'Medium', 'Tall',"Super Tall"], retbins=True)
-    print("Límites de los *bins* alturas:", limites)
+    # datos['cat_altura'], limites = pd.qcut(datos['Alto'], 4, labels=['Short', 'Medium', 'Tall', 'Super Tall'], duplicates='drop', retbins=True)
+    # print("Límites de los *bins* alturas:", limites)
 
 
-    plt.hist(datos['Alto'], bins="auto", color='blue', alpha=0.7) # Puedes ajustar el número de bins según tus datos
-    plt.xlabel('Valores')
-    plt.ylabel('Frecuencia')
-    plt.title('Histograma de la columna "valores"')
-    plt.grid(True)
-    plt.show()
+    # plt.hist(datos['Alto'], bins="auto", color='blue', alpha=0.7) # Puedes ajustar el número de bins según tus datos
+    # plt.xlabel('Valores')
+    # plt.ylabel('Frecuencia')
+    # plt.title('Histograma de la columna "valores"')
+    # plt.grid(True)
+    # plt.show()
 
 
 
@@ -900,12 +903,12 @@ with col1:
 
         print(fecha_inicial_minima,fecha_final_maxima)
 
-        rp = datos_movimientos[datos_movimientos["Tipo"]=="RP"]
-        rp = rp[(rp['Inicio'] >= fecha_inicial_minima) & (rp['Inicio'] <= fecha_final_maxima)]
+        # rp = datos_movimientos[datos_movimientos["Tipo"]=="RP"]
+        datos_movimientos_rp = datos_movimientos_rp[(datos_movimientos_rp['Inicio'] >= fecha_inicial_minima) & (datos_movimientos_rp['Inicio'] <= fecha_final_maxima)]
         # Filtrar el primer DataFrame para obtener solo las filas cuyos valores en la columna "Sector_Pasillo" están en los valores únicos de la lista
-        rp = rp[rp['Sector_Pasillo_Num_D'].isin(valores_unicos) & rp['Artículo'].isin(articulos_paleta)]
-
-
+        datos_movimientos_rp = datos_movimientos_rp[datos_movimientos_rp['Sector_Pasillo_Num_D'].isin(valores_unicos) & datos_movimientos_rp['Artículo'].isin(articulos_paleta)]
+        # st.write(datos_movimientos_rp)
+        
         # display(rp)
 
         recorrida = datos_paleta.groupby("Sector_Pasillo_Num")["Columna"].agg(lambda x: x.max() - x.min()).reset_index()
@@ -1038,15 +1041,15 @@ with col1:
 
         # Graficar puntos adicionales con tamaño proporcional a 'Cantidad'
         fig_3.add_trace(go.Scatter(
-            x=rp['Sector_Pasillo_Num'],
-            y=rp['Columna'],
+            x=datos_movimientos_rp['Sector_Pasillo_Num'],
+            y=datos_movimientos_rp['Columna'],
             mode='markers',
-            marker=dict(size=rp['Cantidad']*0.1, color='blue'),
+            marker=dict(size=datos_movimientos_rp['Cantidad']*0.1, color='blue'),
             name='Reposiciones'
         ))
 
         # Unir los puntos adicionales con líneas
-        for idx, row in rp.iterrows():
+        for idx, row in datos_movimientos_rp.iterrows():
             fig_3.add_trace(go.Scatter(
                 x=[row['Sector_Pasillo_Num'], row['Sector_Pasillo_Num_D']],
                 y=[row['Columna'], row['Columna_D']],
@@ -1075,6 +1078,8 @@ with col1:
         st.plotly_chart(fig_3)
 
         st.write(datos_paleta[["Inicio","Operario","Descripción","Posición O","Cantidad Blt"]])
+
+        st.write(datos_movimientos_rp[["Inicio","Operario","Descripción","Posición O","Cantidad Blt"]])
 
     if mapa_seleccionado == "Productividades":
 
